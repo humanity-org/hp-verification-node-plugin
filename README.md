@@ -58,7 +58,7 @@ docker logs -f hp-verification-node-plugin
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `OWNER_ADDRESS` | **Yes** | — | The Ethereum address that holds the License NFT |
-| `ETH_PRIVATE_KEY` | No | Auto-generated | Private key for the node's wallet (without `0x` prefix) |
+| `ETH_PRIVATE_KEY` | No | Auto-generated | Private key for the node's wallet (without `0x` prefix). If not provided, a new key will be generated automatically |
 | `CONTAINER_NAME` | No | `hp-verification-node-plugin` | Custom container name for running multiple instances |
 
 ## Running Multiple Instances
