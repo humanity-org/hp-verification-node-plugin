@@ -12,7 +12,19 @@ A containerized node that participates in the Humanity Protocol verification net
 
 1. Download the latest release zip from the [Releases](https://github.com/humanity-org/hp-verification-node-plugin/releases) page
 2. Extract the zip file
-3. Run the start script:
+3. Run the start script with `-h` flag to view the complete step-by-step guide:
+
+```bash
+# Linux / macOS
+./start.sh -h
+
+# Windows (Command Prompt)
+start.bat -h
+```
+
+The guide covers everything you need to get your node up and running — just follow the instructions.
+
+4. Once ready, start the node:
 
 ```bash
 # Linux / macOS
@@ -22,12 +34,9 @@ OWNER_ADDRESS=0xYourOwnerAddress ./start.sh -d
 set OWNER_ADDRESS=0xYourOwnerAddress & start.bat -d
 ```
 
-4. Purchase a License NFT and bind it to your node's wallet
-5. The node will begin processing verification tasks automatically
-
 ## Documentation
 
-See [USER_MANUAL.md](https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/hp-verification-node-plugin.zip) included in the release package for full documentation covering:
+A comprehensive `USER_MANUAL.md` is included in the release package, covering:
 
 - Detailed setup instructions for Linux, macOS, and Windows
 - Running multiple instances
