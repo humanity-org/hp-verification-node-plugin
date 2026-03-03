@@ -7,67 +7,82 @@ A containerized node that participates in the Humanity Protocol verification net
 Download the latest release package from the [Releases page](https://github.com/humanity-org/hp-verification-node-plugin/releases/latest).
 
 The zip file contains:
-- `start.sh` — Start script for Linux / macOS
+- `start.sh` — Start script for Linux / macOS (interactive setup wizard)
 - `start.bat` — Start script for Windows
 - `USER_MANUAL.md` — Full user manual
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- A License NFT (purchase from the link in Step 3)
+- A License NFT (purchase from https://sale.staging.humanity.org/)
 - An Ethereum wallet with HP tokens to pay for gas fees when running the node
 
-## Step-by-Step Guide
+## Quick Start
 
-### Step 1 — Install Docker
+### Linux / macOS
 
-Download and install Docker from https://docs.docker.com/get-docker/
-
-### Step 2 — Run the Node
-
-Ensure the node's address has sufficient HP token balance to pay for gas fees, then start the node:
+Simply run the start script — it includes an interactive setup wizard that will guide you through every step:
 
 ```bash
-# Linux / macOS
-OWNER_ADDRESS=0xYourOwnerAddress ETH_PRIVATE_KEY=yourprivatekey ./start.sh -d
-
-# Windows (Command Prompt)
-set OWNER_ADDRESS=0xYourOwnerAddress & set ETH_PRIVATE_KEY=yourprivatekey & start.bat -d
+chmod +x start.sh
+./start.sh
 ```
 
-> **Note:** The `-d` flag runs the container in detached (background) mode.
+The wizard walks you through:
+1. **Checking prerequisites** — verifies Docker is installed and running
+2. **Naming your node** — set a custom name (useful for multiple instances)
+3. **License owner address** — the wallet holding your License NFT
+4. **Node wallet** — use your own key or auto-generate a new one
+5. **Review & launch** — confirm settings and start the node
 
-> **Note:** `ETH_PRIVATE_KEY` is optional (without `0x` prefix). If omitted, a new key will be generated automatically. You'll need to fund the new wallet with HP tokens.
-
-### Step 3 — Purchase License NFT
-
-Visit https://sale.staging.humanity.org/ and purchase a license.
-
-### Step 4 — Bind License to Node
-
-Visit https://humanity.delegate.easeflow.io/licenses and bind the license to your node's wallet address. After successful binding, the node will start processing verification tasks automatically.
-
-### Step 5 — Check Logs
+You can also skip the wizard by passing arguments directly:
 
 ```bash
-docker logs -f hp-verification-node-plugin
+# Skip specific wizard steps with CLI arguments
+./start.sh --owner-address 0x1234...abcd
+./start.sh --owner-address 0x1234... --private-key abcd1234...
+./start.sh --owner-address 0x1234... --container-name my-node
+
+# Or use environment variables for fully non-interactive mode
+OWNER_ADDRESS=0x1234... ETH_PRIVATE_KEY=abcd1234... ./start.sh
 ```
 
-## Environment Variables
+### Windows
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OWNER_ADDRESS` | **Yes** | — | The Ethereum address that holds the License NFT |
-| `ETH_PRIVATE_KEY` | No | Auto-generated | Private key for the node's wallet (without `0x` prefix). If not provided, a new key will be generated automatically |
-| `CONTAINER_NAME` | No | `hp-verification-node-plugin` | Custom container name for running multiple instances |
+```cmd
+set OWNER_ADDRESS=0xYourOwnerAddress
+start.bat
+```
+
+Or with a custom private key:
+
+```cmd
+set OWNER_ADDRESS=0x1234...abcd
+set ETH_PRIVATE_KEY=abcd1234...ef56
+start.bat
+```
+
+> **Note:** `ETH_PRIVATE_KEY` is optional (without `0x` prefix). If not provided, a new key will be generated automatically.
+
+## After Starting the Node
+
+1. **Find your node's wallet address** (if auto-generated):
+   ```bash
+   docker logs hp-verification-node-plugin 2>&1 | head -20
+   ```
+2. **Fund the wallet** with HP tokens for gas fees
+3. **Purchase a License NFT** at https://sale.staging.humanity.org/
+4. **Bind the license** to your node's wallet at https://humanity.delegate.easeflow.io/licenses
+
+Once the license is bound, the node will automatically start processing verification tasks.
 
 ## Running Multiple Instances
 
-Use different `CONTAINER_NAME` values to run multiple nodes on the same machine:
+Run the wizard multiple times with different node names, or use CLI arguments:
 
 ```bash
-CONTAINER_NAME=node-1 OWNER_ADDRESS=0xAddr1 ETH_PRIVATE_KEY=key1 ./start.sh -d
-CONTAINER_NAME=node-2 OWNER_ADDRESS=0xAddr2 ETH_PRIVATE_KEY=key2 ./start.sh -d
+./start.sh --owner-address 0xAddr1 --private-key key1 --container-name node-1
+./start.sh --owner-address 0xAddr2 --private-key key2 --container-name node-2
 ```
 
 Each instance requires its own License NFT and HP token balance.
@@ -75,7 +90,7 @@ Each instance requires its own License NFT and HP token balance.
 ## Common Commands
 
 ```bash
-# View help and full guide
+# View help
 ./start.sh -h
 
 # Check container status
@@ -87,8 +102,8 @@ docker logs -f hp-verification-node-plugin
 # Stop the node
 docker stop hp-verification-node-plugin
 
-# Update to latest version (just re-run the start script)
-OWNER_ADDRESS=0xYourAddr ETH_PRIVATE_KEY=yourkey ./start.sh -d
+# Restart / update to latest version (just re-run the start script)
+./start.sh
 ```
 
 ## Documentation
