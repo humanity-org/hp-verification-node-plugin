@@ -2,15 +2,6 @@
 
 A containerized node that participates in the Humanity Protocol verification network. It runs as a Docker container and automatically processes on-chain verification tasks.
 
-## Download
-
-Download the latest release package from the [Releases page](https://github.com/humanity-org/hp-verification-node-plugin/releases/latest).
-
-The zip file contains:
-- `start.sh` — Start script for Linux / macOS (interactive setup wizard)
-- `start.bat` — Start script for Windows
-- `USER_MANUAL.md` — Full user manual
-
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
@@ -21,9 +12,16 @@ The zip file contains:
 
 ### Linux / macOS
 
-Simply run the start script — it includes an interactive setup wizard that will guide you through every step:
+One command to download and launch the interactive setup wizard:
 
 ```bash
+curl -sSL https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh | bash
+```
+
+Or download first, then run:
+
+```bash
+curl -sSLO https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh
 chmod +x start.sh
 ./start.sh
 ```
@@ -38,7 +36,6 @@ The wizard walks you through:
 You can also skip the wizard by passing arguments directly:
 
 ```bash
-# Skip specific wizard steps with CLI arguments
 ./start.sh --owner-address 0x1234...abcd
 ./start.sh --owner-address 0x1234... --private-key abcd1234...
 ./start.sh --owner-address 0x1234... --container-name my-node
@@ -48,6 +45,14 @@ OWNER_ADDRESS=0x1234... ETH_PRIVATE_KEY=abcd1234... ./start.sh
 ```
 
 ### Windows
+
+Download the start script:
+
+```powershell
+Invoke-WebRequest -Uri https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.bat -OutFile start.bat
+```
+
+Then run:
 
 ```cmd
 set OWNER_ADDRESS=0xYourOwnerAddress
@@ -105,10 +110,6 @@ docker stop hp-verification-node-plugin
 # Restart / update to latest version (just re-run the start script)
 ./start.sh
 ```
-
-## Documentation
-
-A comprehensive `USER_MANUAL.md` is included in the release package with detailed instructions for all platforms, troubleshooting guide, and FAQ.
 
 ## License
 
