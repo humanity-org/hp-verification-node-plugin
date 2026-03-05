@@ -46,28 +46,29 @@ OWNER_ADDRESS=0x1234... ETH_PRIVATE_KEY=abcd1234... ./start.sh
 
 ### Windows
 
-Download the start script:
+Download the start scripts:
 
 ```powershell
-Invoke-WebRequest -Uri https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.bat -OutFile start.bat
+Invoke-WebRequest -Uri https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.cmd -OutFile start.cmd
+Invoke-WebRequest -Uri https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1 -OutFile start.ps1
 ```
 
 Then run:
 
 ```cmd
-set OWNER_ADDRESS=0xYourOwnerAddress
-start.bat
+start.cmd
 ```
 
-Or with a custom private key:
+The PowerShell wizard walks you through the same interactive setup as the Linux/macOS version.
+
+You can also pass arguments directly:
 
 ```cmd
-set OWNER_ADDRESS=0x1234...abcd
-set ETH_PRIVATE_KEY=abcd1234...ef56
-start.bat
+start.cmd --owner-address 0x1234...abcd
+start.cmd --owner-address 0x1234... --private-key abcd1234...
 ```
 
-> **Note:** `ETH_PRIVATE_KEY` is optional (without `0x` prefix). If not provided, a new key will be generated automatically.
+> **Note:** `start.cmd` is a thin launcher that invokes `start.ps1` (the PowerShell wizard). Both files must be in the same directory.
 
 ## After Starting the Node
 
