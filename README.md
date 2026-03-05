@@ -12,13 +12,15 @@ A containerized node that participates in the Humanity Protocol verification net
 
 ### Linux / macOS
 
-One command to download and launch the interactive setup wizard:
+**One-liner** — download and launch the interactive setup wizard:
 
 ```bash
 curl -sSL https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh | bash
 ```
 
-Or download first, then run:
+The script automatically downloads itself and runs interactively, no arguments needed!
+
+**Or download first**, then run:
 
 ```bash
 curl -sSLO https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh
@@ -33,12 +35,16 @@ The wizard walks you through:
 4. **Node wallet** — use your own key or auto-generate a new one
 5. **Review & launch** — confirm settings and start the node
 
-You can also skip the wizard by passing arguments directly:
+**Skip the wizard** by passing arguments directly (works with both local and piped execution):
 
 ```bash
+# Local file
 ./start.sh --owner-address 0x1234...abcd
 ./start.sh --owner-address 0x1234... --private-key abcd1234...
 ./start.sh --owner-address 0x1234... --container-name my-node
+
+# One-liner non-interactive (perfect for scripts/automation)
+curl -sSL https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh | bash -s -- --owner-address 0xYOUR_ADDRESS
 
 # Or use environment variables for fully non-interactive mode
 OWNER_ADDRESS=0x1234... ETH_PRIVATE_KEY=abcd1234... ./start.sh
