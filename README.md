@@ -1,86 +1,75 @@
 # HP Verification Node Plugin
 
-A containerized node that participates in the Humanity Protocol verification network. It runs as a Docker container and automatically processes on-chain verification tasks.
+A verification node plugin for Humanity Protocol. It runs as a Docker container managed by interactive setup scripts, automatically processing on-chain verification tasks.
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- A License NFT (purchase from https://sale.staging.humanity.org/)
-- An Ethereum wallet with HP tokens to pay for gas fees when running the node
+- A Humanity Protocol License NFT
 
 ## Quick Start
 
-### Linux / macOS
+### One-Line Install (Recommended)
 
-One command to download and launch the interactive setup wizard:
+No need to clone the repo. Just run one command and follow the interactive wizard.
+
+**macOS / Linux:**
 
 ```bash
 curl -sSL https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh | bash
 ```
 
-Or download first, then run:
+**Windows (PowerShell):**
+
+```powershell
+irm https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1 | iex
+```
+
+**Windows (CMD):**
+
+```cmd
+powershell -Command "irm https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1 | iex"
+```
+
+### Passing Options
+
+You can skip the interactive wizard by passing options directly:
+
+**macOS / Linux:**
 
 ```bash
-curl -sSLO https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh
-chmod +x start.sh
+curl -sSL https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.sh | bash -s -- --owner-address 0xYOUR_ADDRESS
+```
+
+**Windows (PowerShell):**
+
+```powershell
+& ([scriptblock]::Create((irm https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1))) --owner-address 0xYOUR_ADDRESS
+```
+
+### Available Options
+
+| Option | Description |
+|---|---|
+| `--owner-address <address>` | License NFT holder's Ethereum address |
+| `--private-key <key>` | Private key for transaction signing (without 0x prefix) |
+| `--container-name <name>` | Custom container name (default: `hp-verification-node-plugin`) |
+| `--restart` | Restart using saved config (skip setup wizard) |
+| `-v, --verbose` | Enable debug-level logging |
+
+### Run Locally
+
+If you've already downloaded the scripts:
+
+```bash
 ./start.sh
 ```
 
-The wizard walks you through:
-1. **Checking prerequisites** — verifies Docker is installed and running
-2. **Naming your node** — set a custom name (useful for multiple instances)
-3. **License owner address** — the wallet holding your License NFT
-4. **Node wallet** — use your own key or auto-generate a new one
-5. **Review & launch** — confirm settings and start the node
-
-You can also skip the wizard by passing arguments directly:
-
-```bash
-./start.sh --owner-address 0x1234...abcd
-./start.sh --owner-address 0x1234... --private-key abcd1234...
-./start.sh --owner-address 0x1234... --container-name my-node
-
-# Or use environment variables for fully non-interactive mode
-OWNER_ADDRESS=0x1234... ETH_PRIVATE_KEY=abcd1234... ./start.sh
-```
-
-### Windows
-
-Download the start scripts:
+On Windows, double-click `start.cmd` or run:
 
 ```powershell
-Invoke-WebRequest -Uri https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.cmd -OutFile start.cmd
-Invoke-WebRequest -Uri https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1 -OutFile start.ps1
+.\start.ps1
 ```
-
-Then run:
-
-```cmd
-start.cmd
-```
-
-The PowerShell wizard walks you through the same interactive setup as the Linux/macOS version.
-
-You can also pass arguments directly:
-
-```cmd
-start.cmd --owner-address 0x1234...abcd
-start.cmd --owner-address 0x1234... --private-key abcd1234...
-```
-
-> **Note:** `start.cmd` is a thin launcher that invokes `start.ps1` (the PowerShell wizard). Both files must be in the same directory.
-
-## After Starting the Node
-
-1. **Find your node's wallet address** (if auto-generated):
-   ```bash
-   docker logs hp-verification-node-plugin 2>&1 | head -20
-   ```
-2. **Fund the wallet** with HP tokens for gas fees
-3. **Purchase a License NFT** at https://sale.staging.humanity.org/
-4. **Bind the license** to your node's wallet at https://humanity.delegate.easeflow.io/licenses
-
-Once the license is bound, the node will automatically start processing verification tasks.
 
 ## Running Multiple Instances
 
@@ -110,7 +99,19 @@ docker stop hp-verification-node-plugin
 
 # Restart / update to latest version (just re-run the start script)
 ./start.sh
+./start.sh --restart  # skip wizard, reuse saved config
 ```
+
+## Troubleshooting
+
+### Authentication Failures
+
+- Verify private key is correctly configured
+- Ensure verification API base URL is accessible
+
+### Version Mismatch
+
+If jobs are being skipped with "Node version too old" message, re-run the start script to pull the latest image.
 
 ## License
 
