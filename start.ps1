@@ -9,7 +9,12 @@
     .\start.ps1
     .\start.ps1 --owner-address 0x1234...abcd
     .\start.ps1 --restart -v
+    & ([scriptblock]::Create((irm <url>))) --network mainnet
 #>
+param(
+    [Parameter(ValueFromRemainingArguments=$true)]
+    [string[]]$ScriptArgs
+)
 
 # NOTE: Do NOT use $ErrorActionPreference = "Stop" globally.
 # Docker and other external commands write to stderr for warnings/progress,
@@ -82,29 +87,29 @@ function Show-Help {
 }
 
 $i = 0
-while ($i -lt $args.Count) {
-    switch ($args[$i]) {
+while ($i -lt $ScriptArgs.Count) {
+    switch ($ScriptArgs[$i]) {
         { $_ -in "-h", "--help", "/?" } { Show-Help }
-        { $_ -in "-v", "--verbose" } { $VERBOSE = $true; $LOG_LEVEL = "debug"; $i++ }
-        "--restart" { $RESTART = $true; $i++ }
+        { $_ -in "-v", "--verbose" } { $script:VERBOSE = $true; $script:LOG_LEVEL = "debug"; $i++ }
+        "--restart" { $script:RESTART = $true; $i++ }
         "--owner-address" {
-            if ($i + 1 -ge $args.Count) { Write-Host "Error: --owner-address requires a value."; exit 1 }
-            $ARG_OWNER = $args[$i + 1]; $i += 2
+            if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --owner-address requires a value."; exit 1 }
+            $script:ARG_OWNER = $ScriptArgs[$i + 1]; $i += 2
         }
         "--private-key" {
-            if ($i + 1 -ge $args.Count) { Write-Host "Error: --private-key requires a value."; exit 1 }
-            $ARG_KEY = $args[$i + 1]; $i += 2
+            if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --private-key requires a value."; exit 1 }
+            $script:ARG_KEY = $ScriptArgs[$i + 1]; $i += 2
         }
         "--container-name" {
-            if ($i + 1 -ge $args.Count) { Write-Host "Error: --container-name requires a value."; exit 1 }
-            $ARG_NAME = $args[$i + 1]; $i += 2
+            if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --container-name requires a value."; exit 1 }
+            $script:ARG_NAME = $ScriptArgs[$i + 1]; $i += 2
         }
         "--network" {
-            if ($i + 1 -ge $args.Count) { Write-Host "Error: --network requires a value (testnet or mainnet)."; exit 1 }
-            $NETWORK = $args[$i + 1]; $i += 2
+            if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --network requires a value (testnet or mainnet)."; exit 1 }
+            $script:NETWORK = $ScriptArgs[$i + 1]; $i += 2
         }
         default {
-            Write-Host "Unknown option: $($args[$i])"
+            Write-Host "Unknown option: $($ScriptArgs[$i])"
             Write-Host "Run 'start.cmd --help' for usage."
             exit 1
         }

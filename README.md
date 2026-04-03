@@ -37,10 +37,16 @@ irm https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/
 & ([scriptblock]::Create((irm https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1))) --network mainnet
 ```
 
-**Windows (CMD):**
+**Windows (CMD - Testnet):**
 
 ```cmd
 powershell -Command "irm https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1 | iex"
+```
+
+**Windows (CMD - Mainnet):**
+
+```cmd
+powershell -Command "& ([scriptblock]::Create((irm https://github.com/humanity-org/hp-verification-node-plugin/releases/latest/download/start.ps1))) --network mainnet"
 ```
 
 ### Passing Options
