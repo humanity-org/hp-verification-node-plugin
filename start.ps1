@@ -57,6 +57,7 @@ $POLL_INTERVAL = 10
 $ARG_OWNER = ""
 $ARG_KEY = ""
 $ARG_NAME = ""
+$ARG_RPC = ""
 $VERBOSE = $false
 $LOG_LEVEL = "info"
 $RESTART = $false
@@ -72,6 +73,7 @@ function Show-Help {
     Write-Host "  --private-key <private_key>    Private key for transaction signing"
     Write-Host "  --container-name <name>        Custom container name (default: hp-verification-node-plugin)"
     Write-Host "  --network <testnet|mainnet>    Select network (default: testnet)"
+    Write-Host "  --rpc <url>                    Override default RPC URL for the selected network"
     Write-Host "  --restart                      Restart using saved config (skip wizard)"
     Write-Host "  -v, --verbose                  Enable debug-level logging"
     Write-Host "  -h, --help, /?                 Show this help message"
@@ -108,6 +110,10 @@ while ($i -lt $ScriptArgs.Count) {
             if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --network requires a value (testnet or mainnet)."; exit 1 }
             $script:NETWORK = $ScriptArgs[$i + 1]; $i += 2
         }
+        "--rpc" {
+            if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --rpc requires a value."; exit 1 }
+            $script:ARG_RPC = $ScriptArgs[$i + 1]; $i += 2
+        }
         default {
             Write-Host "Unknown option: $($ScriptArgs[$i])"
             Write-Host "Run 'start.cmd --help' for usage."
@@ -118,6 +124,11 @@ while ($i -lt $ScriptArgs.Count) {
 
 # Apply network configuration based on --network flag
 Set-NetworkConfig
+
+# Override RPC URL if user supplied --rpc
+if ($ARG_RPC) {
+    $RPC_URL = $ARG_RPC
+}
 
 # ─────────────────────────────────────────
 # Print helpers (colored output)

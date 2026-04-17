@@ -43,6 +43,7 @@ show_help() {
   echo "  --private-key <private_key>    Private key for transaction signing (without 0x prefix)"
   echo "  --container-name <name>        Custom container name (default: hp-verification-node-plugin)"
   echo "  --network <testnet|mainnet>    Select network (default: testnet)"
+  echo "  --rpc <url>                    Override default RPC URL for the selected network"
   echo "  --restart                      Restart using saved config (skip interactive wizard)"
   echo "  -v, --verbose                  Enable debug-level logging in the node"
   echo "  -h, --help                     Show this help message"
@@ -63,6 +64,7 @@ show_help() {
 ARG_OWNER=""
 ARG_KEY=""
 ARG_NAME=""
+ARG_RPC=""
 DEFAULT_OWNER=""
 DEFAULT_KEY=""
 DEFAULT_NAME=""
@@ -92,6 +94,10 @@ while [ $# -gt 0 ]; do
       NETWORK="$2"
       shift 2
       ;;
+    --rpc)
+      ARG_RPC="$2"
+      shift 2
+      ;;
     --restart)
       RESTART="true"
       shift
@@ -111,6 +117,11 @@ done
 
 # Apply network configuration based on --network flag
 set_network_config
+
+# Override RPC URL if user supplied --rpc
+if [ -n "$ARG_RPC" ]; then
+  RPC_URL="$ARG_RPC"
+fi
 
 # Colors
 GREEN='\033[0;32m'
