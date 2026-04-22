@@ -44,6 +44,7 @@ show_help() {
   echo "  --container-name <name>        Custom container name (default: hp-verification-node-plugin)"
   echo "  --network <testnet|mainnet>    Select network (default: testnet)"
   echo "  --rpc <url>                    Override default RPC URL for the selected network"
+  echo "  --node-version <version>       Override node version from config (e.g. 1.2.0)"
   echo "  --restart                      Restart using saved config (skip interactive wizard)"
   echo "  -v, --verbose                  Enable debug-level logging in the node"
   echo "  -h, --help                     Show this help message"
@@ -55,6 +56,7 @@ show_help() {
   echo "  ./start.sh --owner-address 0x1234...abcd                            # Skip owner address step"
   echo "  ./start.sh --owner-address 0x1234... --private-key abcd1234...      # Skip owner & key steps"
   echo "  ./start.sh --owner-address 0x1234... --container-name my-node       # Skip owner & name steps"
+  echo "  ./start.sh --restart --node-version 1.2.0                           # Restart with specific node version"
   echo ""
   echo "One-liner (curl):"
   echo "  curl -sSL https://raw.githubusercontent.com/humanity-org/hp-verification-node-plugin/main/start.sh | bash -s -- --owner-address 0x1234..."
@@ -65,6 +67,7 @@ ARG_OWNER=""
 ARG_KEY=""
 ARG_NAME=""
 ARG_RPC=""
+ARG_NODE_VERSION=""
 DEFAULT_OWNER=""
 DEFAULT_KEY=""
 DEFAULT_NAME=""
@@ -96,6 +99,10 @@ while [ $# -gt 0 ]; do
       ;;
     --rpc)
       ARG_RPC="$2"
+      shift 2
+      ;;
+    --node-version)
+      ARG_NODE_VERSION="$2"
       shift 2
       ;;
     --restart)
@@ -733,11 +740,12 @@ launch_container() {
     # Check if configuration has changed
     local running_env
     running_env=$(docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "${CONTAINER_NAME}" 2>/dev/null)
-    local running_owner running_key running_log_level
+    local running_owner running_key running_log_level running_node_version
     running_owner=$(echo "$running_env" | grep "^OWNERS_ALLOWLIST=" | cut -d= -f2)
     running_key=$(echo "$running_env" | grep "^ETH_PRIVATE_KEY=" | cut -d= -f2)
     running_log_level=$(echo "$running_env" | grep "^LOG_LEVEL=" | cut -d= -f2)
-    if [ "$running_owner" != "$OWNER_ADDRESS" ] || [ "$running_key" != "$ETH_PRIVATE_KEY" ] || [ "$running_log_level" != "$LOG_LEVEL" ]; then
+    running_node_version=$(echo "$running_env" | grep "^NODE_VERSION=" | cut -d= -f2)
+    if [ "$running_owner" != "$OWNER_ADDRESS" ] || [ "$running_key" != "$ETH_PRIVATE_KEY" ] || [ "$running_log_level" != "$LOG_LEVEL" ] || { [ -n "$ARG_NODE_VERSION" ] && [ "$running_node_version" != "$ARG_NODE_VERSION" ]; }; then
       config_changed="true"
     fi
   fi
@@ -821,10 +829,16 @@ launch_container() {
     fi
   fi
 
+  local node_version_env=()
+  if [ -n "$ARG_NODE_VERSION" ]; then
+    node_version_env=(-e "NODE_VERSION=$ARG_NODE_VERSION")
+  fi
+
   if ! docker run -d \
     -e OWNERS_ALLOWLIST="$OWNER_ADDRESS" \
     -e ETH_PRIVATE_KEY="$ETH_PRIVATE_KEY" \
     -e LOG_LEVEL="$LOG_LEVEL" \
+    "${node_version_env[@]}" \
     -e HTTP_PROXY= \
     -e HTTPS_PROXY= \
     -e http_proxy= \
