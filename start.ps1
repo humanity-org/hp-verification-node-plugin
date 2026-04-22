@@ -58,6 +58,7 @@ $ARG_OWNER = ""
 $ARG_KEY = ""
 $ARG_NAME = ""
 $ARG_RPC = ""
+$ARG_NODE_VERSION = ""
 $VERBOSE = $false
 $LOG_LEVEL = "info"
 $RESTART = $false
@@ -74,6 +75,7 @@ function Show-Help {
     Write-Host "  --container-name <name>        Custom container name (default: hp-verification-node-plugin)"
     Write-Host "  --network <testnet|mainnet>    Select network (default: testnet)"
     Write-Host "  --rpc <url>                    Override default RPC URL for the selected network"
+    Write-Host "  --node-version <version>       Override node version from config (e.g. 1.2.0)"
     Write-Host "  --restart                      Restart using saved config (skip wizard)"
     Write-Host "  -v, --verbose                  Enable debug-level logging"
     Write-Host "  -h, --help, /?                 Show this help message"
@@ -113,6 +115,10 @@ while ($i -lt $ScriptArgs.Count) {
         "--rpc" {
             if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --rpc requires a value."; exit 1 }
             $script:ARG_RPC = $ScriptArgs[$i + 1]; $i += 2
+        }
+        "--node-version" {
+            if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --node-version requires a value."; exit 1 }
+            $script:ARG_NODE_VERSION = $ScriptArgs[$i + 1]; $i += 2
         }
         default {
             Write-Host "Unknown option: $($ScriptArgs[$i])"
@@ -804,7 +810,9 @@ function Start-LaunchContainer {
         $runningOwner = ($envLines | Where-Object { $_ -match "^OWNERS_ALLOWLIST=" }) -replace "^OWNERS_ALLOWLIST=", ""
         $runningKey = ($envLines | Where-Object { $_ -match "^ETH_PRIVATE_KEY=" }) -replace "^ETH_PRIVATE_KEY=", ""
         $runningLogLevel = ($envLines | Where-Object { $_ -match "^LOG_LEVEL=" }) -replace "^LOG_LEVEL=", ""
-        if ($runningOwner -ne $OWNER_ADDRESS -or $runningKey -ne $ETH_PRIVATE_KEY -or $runningLogLevel -ne $LOG_LEVEL) {
+        $runningNodeVersion = ($envLines | Where-Object { $_ -match "^NODE_VERSION=" }) -replace "^NODE_VERSION=", ""
+        if ($runningOwner -ne $OWNER_ADDRESS -or $runningKey -ne $ETH_PRIVATE_KEY -or $runningLogLevel -ne $LOG_LEVEL -or
+            ($ARG_NODE_VERSION -and $runningNodeVersion -ne $ARG_NODE_VERSION)) {
             $configChanged = $true
         }
     }
@@ -881,11 +889,19 @@ function Start-LaunchContainer {
         }
     }
 
+    # Build extra env args for optional overrides
+    $extraEnvArgs = @()
+    if ($ARG_NODE_VERSION) {
+        $extraEnvArgs += "-e"
+        $extraEnvArgs += "NODE_VERSION=$ARG_NODE_VERSION"
+    }
+
     # Run container (capture output to check for errors)
     $dockerRunOutput = docker run -d `
         -e "OWNERS_ALLOWLIST=$OWNER_ADDRESS" `
         -e "ETH_PRIVATE_KEY=$ETH_PRIVATE_KEY" `
         -e "LOG_LEVEL=$LOG_LEVEL" `
+        @extraEnvArgs `
         -e "HTTP_PROXY=" `
         -e "HTTPS_PROXY=" `
         -e "http_proxy=" `
