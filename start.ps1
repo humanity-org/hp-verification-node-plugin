@@ -889,26 +889,29 @@ function Start-LaunchContainer {
         }
     }
 
-    # Build extra env args for optional overrides
-    $extraEnvArgs = @()
+    # Build docker run arguments as an array for reliable native command expansion
+    $dockerArgs = @(
+        "run", "-d",
+        "-e", "OWNERS_ALLOWLIST=$OWNER_ADDRESS",
+        "-e", "ETH_PRIVATE_KEY=$ETH_PRIVATE_KEY",
+        "-e", "LOG_LEVEL=$LOG_LEVEL"
+    )
     if ($ARG_NODE_VERSION) {
-        $extraEnvArgs += "-e"
-        $extraEnvArgs += "NODE_VERSION=$ARG_NODE_VERSION"
+        $dockerArgs += "-e"
+        $dockerArgs += "NODE_VERSION=$ARG_NODE_VERSION"
     }
+    $dockerArgs += @(
+        "-e", "HTTP_PROXY=",
+        "-e", "HTTPS_PROXY=",
+        "-e", "http_proxy=",
+        "-e", "https_proxy=",
+        "-v", "${dataDir}:/app/cache",
+        "--name", $CONTAINER_NAME,
+        $IMAGE_NAME
+    )
 
     # Run container (capture output to check for errors)
-    $dockerRunOutput = docker run -d `
-        -e "OWNERS_ALLOWLIST=$OWNER_ADDRESS" `
-        -e "ETH_PRIVATE_KEY=$ETH_PRIVATE_KEY" `
-        -e "LOG_LEVEL=$LOG_LEVEL" `
-        @extraEnvArgs `
-        -e "HTTP_PROXY=" `
-        -e "HTTPS_PROXY=" `
-        -e "http_proxy=" `
-        -e "https_proxy=" `
-        -v "${dataDir}:/app/cache" `
-        --name $CONTAINER_NAME `
-        $IMAGE_NAME 2>&1
+    $dockerRunOutput = & docker @dockerArgs 2>&1
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host ""
