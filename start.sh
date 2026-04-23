@@ -731,11 +731,7 @@ launch_container() {
   # Check if container already exists and is running with the same image & config
   local current_image_id=""
   local container_running="false"
-  # If --node-version is explicitly passed, always force restart to ensure NODE_VERSION is injected
   local config_changed="false"
-  if [ -n "$ARG_NODE_VERSION" ]; then
-    config_changed="true"
-  fi
   if docker inspect "${CONTAINER_NAME}" &>/dev/null; then
     current_image_id=$(docker inspect --format '{{.Image}}' "${CONTAINER_NAME}" 2>/dev/null)
     if docker inspect --format '{{.State.Running}}' "${CONTAINER_NAME}" 2>/dev/null | grep -q "true"; then
@@ -744,12 +740,11 @@ launch_container() {
     # Check if configuration has changed
     local running_env
     running_env=$(docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "${CONTAINER_NAME}" 2>/dev/null)
-    local running_owner running_key running_log_level running_node_version
+    local running_owner running_key running_log_level
     running_owner=$(echo "$running_env" | grep "^OWNERS_ALLOWLIST=" | cut -d= -f2)
     running_key=$(echo "$running_env" | grep "^ETH_PRIVATE_KEY=" | cut -d= -f2)
     running_log_level=$(echo "$running_env" | grep "^LOG_LEVEL=" | cut -d= -f2)
-    running_node_version=$(echo "$running_env" | grep "^NODE_VERSION=" | cut -d= -f2)
-    if [ "$running_owner" != "$OWNER_ADDRESS" ] || [ "$running_key" != "$ETH_PRIVATE_KEY" ] || [ "$running_log_level" != "$LOG_LEVEL" ] || { [ -n "$ARG_NODE_VERSION" ] && [ "$running_node_version" != "$ARG_NODE_VERSION" ]; }; then
+    if [ "$running_owner" != "$OWNER_ADDRESS" ] || [ "$running_key" != "$ETH_PRIVATE_KEY" ] || [ "$running_log_level" != "$LOG_LEVEL" ]; then
       config_changed="true"
     fi
   fi
@@ -833,16 +828,10 @@ launch_container() {
     fi
   fi
 
-  local node_version_env=()
-  if [ -n "$ARG_NODE_VERSION" ]; then
-    node_version_env=(-e "NODE_VERSION=$ARG_NODE_VERSION")
-  fi
-
   if ! docker run -d \
     -e OWNERS_ALLOWLIST="$OWNER_ADDRESS" \
     -e ETH_PRIVATE_KEY="$ETH_PRIVATE_KEY" \
     -e LOG_LEVEL="$LOG_LEVEL" \
-    "${node_version_env[@]}" \
     -e HTTP_PROXY= \
     -e HTTPS_PROXY= \
     -e http_proxy= \
