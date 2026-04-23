@@ -45,6 +45,7 @@ show_help() {
   echo "  --network <testnet|mainnet>    Select network (default: testnet)"
   echo "  --rpc <url>                    Override default RPC URL for the selected network"
   echo "  --node-version <version>       Override node version from config (e.g. 1.2.0)"
+  echo "  --chain-id <id>                Override chain ID (default: 7080969)"
   echo "  --restart                      Restart using saved config (skip interactive wizard)"
   echo "  -v, --verbose                  Enable debug-level logging in the node"
   echo "  -h, --help                     Show this help message"
@@ -68,6 +69,7 @@ ARG_KEY=""
 ARG_NAME=""
 ARG_RPC=""
 ARG_NODE_VERSION=""
+ARG_CHAIN_ID=""
 DEFAULT_OWNER=""
 DEFAULT_KEY=""
 DEFAULT_NAME=""
@@ -103,6 +105,10 @@ while [ $# -gt 0 ]; do
       ;;
     --node-version)
       ARG_NODE_VERSION="$2"
+      shift 2
+      ;;
+    --chain-id)
+      ARG_CHAIN_ID="$2"
       shift 2
       ;;
     --restart)
@@ -828,10 +834,16 @@ launch_container() {
     fi
   fi
 
+  local chain_id_arg=""
+  if [ -n "$ARG_CHAIN_ID" ]; then
+    chain_id_arg="-e CHAIN_ID=$ARG_CHAIN_ID"
+  fi
+
   if ! docker run -d \
     -e OWNERS_ALLOWLIST="$OWNER_ADDRESS" \
     -e ETH_PRIVATE_KEY="$ETH_PRIVATE_KEY" \
     -e LOG_LEVEL="$LOG_LEVEL" \
+    ${chain_id_arg:+$chain_id_arg} \
     -e HTTP_PROXY= \
     -e HTTPS_PROXY= \
     -e http_proxy= \
