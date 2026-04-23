@@ -796,8 +796,7 @@ function Start-LaunchContainer {
     # Check if container exists and compare image & config
     $currentImageId = ""
     $containerRunning = $false
-    # If --node-version is explicitly passed, always force restart to ensure NODE_VERSION is injected
-    $configChanged = [bool]$ARG_NODE_VERSION
+    $configChanged = $false
 
     $null = docker inspect $CONTAINER_NAME 2>&1
     if ($LASTEXITCODE -eq 0) {
@@ -811,9 +810,7 @@ function Start-LaunchContainer {
         $runningOwner = ($envLines | Where-Object { $_ -match "^OWNERS_ALLOWLIST=" }) -replace "^OWNERS_ALLOWLIST=", ""
         $runningKey = ($envLines | Where-Object { $_ -match "^ETH_PRIVATE_KEY=" }) -replace "^ETH_PRIVATE_KEY=", ""
         $runningLogLevel = ($envLines | Where-Object { $_ -match "^LOG_LEVEL=" }) -replace "^LOG_LEVEL=", ""
-        $runningNodeVersion = ($envLines | Where-Object { $_ -match "^NODE_VERSION=" }) -replace "^NODE_VERSION=", ""
-        if ($runningOwner -ne $OWNER_ADDRESS -or $runningKey -ne $ETH_PRIVATE_KEY -or $runningLogLevel -ne $LOG_LEVEL -or
-            ($ARG_NODE_VERSION -and $runningNodeVersion -ne $ARG_NODE_VERSION)) {
+        if ($runningOwner -ne $OWNER_ADDRESS -or $runningKey -ne $ETH_PRIVATE_KEY -or $runningLogLevel -ne $LOG_LEVEL) {
             $configChanged = $true
         }
     }
@@ -895,13 +892,7 @@ function Start-LaunchContainer {
         "run", "-d",
         "-e", "OWNERS_ALLOWLIST=$OWNER_ADDRESS",
         "-e", "ETH_PRIVATE_KEY=$ETH_PRIVATE_KEY",
-        "-e", "LOG_LEVEL=$LOG_LEVEL"
-    )
-    if ($ARG_NODE_VERSION) {
-        $dockerArgs += "-e"
-        $dockerArgs += "NODE_VERSION=$ARG_NODE_VERSION"
-    }
-    $dockerArgs += @(
+        "-e", "LOG_LEVEL=$LOG_LEVEL",
         "-e", "HTTP_PROXY=",
         "-e", "HTTPS_PROXY=",
         "-e", "http_proxy=",
