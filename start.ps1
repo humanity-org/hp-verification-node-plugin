@@ -796,7 +796,8 @@ function Start-LaunchContainer {
     # Check if container exists and compare image & config
     $currentImageId = ""
     $containerRunning = $false
-    $configChanged = $false
+    # If --node-version is explicitly passed, always force restart to ensure NODE_VERSION is injected
+    $configChanged = [bool]$ARG_NODE_VERSION
 
     $null = docker inspect $CONTAINER_NAME 2>&1
     if ($LASTEXITCODE -eq 0) {
