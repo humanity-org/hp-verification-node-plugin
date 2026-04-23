@@ -893,6 +893,13 @@ function Start-LaunchContainer {
         }
     }
 
+    # Write node-override.json if --node-version is specified (read by heartbeat on each tick)
+    $overrideFile = Join-Path $dataDir "node-override.json"
+    if ($ARG_NODE_VERSION) {
+        [System.IO.File]::WriteAllText($overrideFile, "{`"nodeVersion`":`"$ARG_NODE_VERSION`"}", (New-Object System.Text.UTF8Encoding $false))
+        Write-Host "  Node version override set: $ARG_NODE_VERSION" -ForegroundColor DarkGray
+    }
+
     # Build docker run arguments as an array for reliable native command expansion
     $dockerArgs = @(
         "run", "-d",
