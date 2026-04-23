@@ -59,6 +59,7 @@ $ARG_KEY = ""
 $ARG_NAME = ""
 $ARG_RPC = ""
 $ARG_NODE_VERSION = ""
+$ARG_CHAIN_ID = ""
 $VERBOSE = $false
 $LOG_LEVEL = "info"
 $RESTART = $false
@@ -76,6 +77,7 @@ function Show-Help {
     Write-Host "  --network <testnet|mainnet>    Select network (default: testnet)"
     Write-Host "  --rpc <url>                    Override default RPC URL for the selected network"
     Write-Host "  --node-version <version>       Override node version from config (e.g. 1.2.0)"
+    Write-Host "  --chain-id <id>                Override chain ID (default: 7080969)"
     Write-Host "  --restart                      Restart using saved config (skip wizard)"
     Write-Host "  -v, --verbose                  Enable debug-level logging"
     Write-Host "  -h, --help, /?                 Show this help message"
@@ -119,6 +121,10 @@ while ($i -lt $ScriptArgs.Count) {
         "--node-version" {
             if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --node-version requires a value."; exit 1 }
             $script:ARG_NODE_VERSION = $ScriptArgs[$i + 1]; $i += 2
+        }
+        "--chain-id" {
+            if ($i + 1 -ge $ScriptArgs.Count) { Write-Host "Error: --chain-id requires a value."; exit 1 }
+            $script:ARG_CHAIN_ID = $ScriptArgs[$i + 1]; $i += 2
         }
         default {
             Write-Host "Unknown option: $($ScriptArgs[$i])"
@@ -892,7 +898,12 @@ function Start-LaunchContainer {
         "run", "-d",
         "-e", "OWNERS_ALLOWLIST=$OWNER_ADDRESS",
         "-e", "ETH_PRIVATE_KEY=$ETH_PRIVATE_KEY",
-        "-e", "LOG_LEVEL=$LOG_LEVEL",
+        "-e", "LOG_LEVEL=$LOG_LEVEL"
+    )
+    if ($ARG_CHAIN_ID) {
+        $dockerArgs += "-e", "CHAIN_ID=$ARG_CHAIN_ID"
+    }
+    $dockerArgs += @(
         "-e", "HTTP_PROXY=",
         "-e", "HTTPS_PROXY=",
         "-e", "http_proxy=",
