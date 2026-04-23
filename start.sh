@@ -731,7 +731,11 @@ launch_container() {
   # Check if container already exists and is running with the same image & config
   local current_image_id=""
   local container_running="false"
+  # If --node-version is explicitly passed, always force restart to ensure NODE_VERSION is injected
   local config_changed="false"
+  if [ -n "$ARG_NODE_VERSION" ]; then
+    config_changed="true"
+  fi
   if docker inspect "${CONTAINER_NAME}" &>/dev/null; then
     current_image_id=$(docker inspect --format '{{.Image}}' "${CONTAINER_NAME}" 2>/dev/null)
     if docker inspect --format '{{.State.Running}}' "${CONTAINER_NAME}" 2>/dev/null | grep -q "true"; then
